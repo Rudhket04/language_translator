@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Language Converter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 80%;
+            max-width: 600px;
+            margin: 50px auto;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+            color: #555;
+        }
+        select, textarea, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            border: none;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .output-box {
+            background-color: #f1f1f1;
+            padding: 15px;
+            margin-top: 10px;
+            border-radius: 5px;
+            min-height: 100px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Language Converter</h1>
+    
+    <div class="form-group">
+        <label for="fromLanguage">Select Source Language:</label>
+        <select id="fromLanguage">
+            <option value="en">English</option>
+            <option value="es">Spanish</option>
+            <option value="fr">French</option>
+            <option value="de">German</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="toLanguage">Select Target Language:</label>
+        <select id="toLanguage">
+            <option value="en">English</option>
+            <option value="es">Spanish</option>
+            <option value="fr">French</option>
+            <option value="de">German</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="speechInput">Speak or Enter Text:</label>
+        <textarea id="speechInput" rows="4" placeholder="Click the button below to speak or type here..."></textarea>
+    </div>
+
+    <button id="speakBtn">Speak</button>
+
+    <button id="translateBtn">Translate</button>
+
+    <div class="form-group">
+        <label for="translatedOutput">Translated Output:</label>
+        <div id="translatedOutput" class="output-box"></div>
+    </div>
+
+    <button id="speakOutputBtn">Speak Output</button>
+</div>
+
+<script>
+    const fromLanguageSelect = document.getElementById('fromLanguage');
+    const toLanguageSelect = document.getElementById('toLanguage');
+    const speechInput = document.getElementById('speechInput');
+    const translatedOutput = document.getElementById('translatedOutput');
+    const speakBtn = document.getElementById('speakBtn');
+    const translateBtn = document.getElementById('translateBtn');
+    const speakOutputBtn = document.getElementById('speakOutputBtn');
+
+    // Simulate Translation (Replace with actual API call in the future)
+    const simulateTranslation = (text, fromLang, toLang) => {
+        // This is just a mock translation function.
+        return text + ' (translated from ' + fromLang + ' to ' + toLang + ')';
+    };
+
+    // Web Speech API: Speech Recognition
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition;
+
+    if (SpeechRecognition) {
+        recognition = new SpeechRecognition();
+        recognition.lang = fromLanguageSelect.value;
+        recognition.interimResults = false;
+        
+        // Handle Speech Recognition
+        speakBtn.addEventListener('click', () => {
+            recognition.start();
+        });
+
+        recognition.onresult = (event) => {
+            const speechResult = event.results[0][0].transcript;
+            speechInput.value = speechResult;
+        };
+
+        recognition.onerror = (event) => {
+            console.error('Speech Recognition Error:', event.error);
+            alert('Error in speech recognition: ' + event.error);
+        };
+
+        // Update recognition language when source language changes
+        fromLanguageSelect.addEventListener('change', () => {
+            recognition.lang = fromLanguageSelect.value;
+        });
+    } else {
+        alert('Speech Recognition is not supported in your browser. Please try using Google Chrome.');
+    }
+
+    // Translation Functionality
+    translateBtn.addEventListener('click', () => {
+        const inputText = speechInput.value;
+        const fromLang = fromLanguageSelect.value;
+        const toLang = toLanguageSelect.value;
+
+        if (inputText) {
+            const translatedText = simulateTranslation(inputText, fromLang, toLang);
+            translatedOutput.innerText = translatedText;
+        } else {
+            alert('Please enter text or speak first.');
+        }
+    });
+
+    // Web Speech API: Speech Synthesis (Text-to-Speech)
+    const synth = window.speechSynthesis;
+
+    speakOutputBtn.addEventListener('click', () => {
+        const outputText = translatedOutput.innerText;
+        if (outputText) {
+            const utterance = new SpeechSynthesisUtterance(outputText);
+            utterance.lang = toLanguageSelect.value;
+            synth.speak(utterance);
+        } else {
+            alert('No translated text to speak.');
+        }
+    });
+</script>
+
+</body>
+</html>
